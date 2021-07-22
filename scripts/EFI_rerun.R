@@ -18,8 +18,8 @@ homedir <- "/projectnb/dietzelab/cjreimer"
 args = list()
 args$settings = file.path(homedir, "/Site_XMLS/bart.xml") #remember to change to where you store the site.xmls
 args$continue = TRUE
-args$start_date = as.Date("2021-01-01") #remember to change start & end date to your desired dates
-args$end_date = as.Date("2021-01-12") #remember to change start & end date to your desired dates
+args$start_date = as.Date("2021-06-01") #remember to change start & end date to your desired dates
+args$end_date = as.Date("2021-06-12") #remember to change start & end date to your desired dates
 
 args$outputPath <- file.path(homedir, "Site_Outputs/Bartlett/") #remember to change to where you want the model outputs saved
 
@@ -28,7 +28,8 @@ setwd(args$outputPath)
 
 #Create loop variables
 dates = args$start_date + 0:as.numeric(args$end_date - args$start_date)
-days_with_met_data = NA
+days_with_met_data = NULL
+days_without_met_data = NULL 
 input_checkinfo <- list()
 
 # Open and read in settings file for PEcAn run.
@@ -52,32 +53,17 @@ for(t in 1:length(dates)){
                               exact.dates = TRUE,
                               return.all=TRUE
                             )
-
-  input_checkinfo[[t]] = input_check
-  input_checkinfo[[t]]$date = dates[t]
-  
-}
-
-###### store (separately) which days do and don't have met data and print
-
-for (k in 1:length(input_checkinfo)) {
-  if(length(input_checkinfo[[k]]$id) > 0){
-    days_with_met_data[k] = TRUE
+  if(!is.null(input_check$id)){
+    input_checkinfo[[t]] = input_check
+    input_checkinfo[[t]]$date = dates[t]
+    days_with_met_data = append(days_with_met_data, dates[t])
   }else{
-    days_with_met_data[k] = FALSE
-  }
+      days_without_met_data = append(days_without_met_data, dates[t])
+    }
 }
 
 
-input_check_winners <- list()
-counter = 1
-for(i in 1:length(input_checkinfo)){
-  if(file.exists(input_checkinfo[[i]]$file_path)){
-    input_check_winners[[counter]] = input_checkinfo[[i]]
-    counter = counter + 1
-    
-  }
-}
+
 
 #If INPUTS already exists, add id and met path to settings file
 
@@ -113,6 +99,6 @@ PEcAn.DB::db.close(con)
 PEcAn.settings::write.settings(settings[[t]], outputfile = "pecan.GEFS.xml")
  
 print(days_with_met_data)
-print(input_check$id)
+
 
 
