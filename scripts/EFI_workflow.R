@@ -12,7 +12,9 @@ library("dynutils")
 
 ###### Preping Workflow for regular SIPNET Run ##############
 #set home directory as object (remember to change to your own directory before running this script)
+
 homedir <- "/projectnb/dietzelab/cjreimer"
+
 
 #Load site.xml, start & end date, (with commandArgs specify args in terminal) and outputPath (i.e. where the model outputs will be stored) into args
 tmp = commandArgs(trailingOnly = TRUE)
